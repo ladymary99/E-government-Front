@@ -13,8 +13,8 @@ const CitizenRegister = () => {
     phone: "",
     address: "",
   });
-  const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
+  const [error, setError] = useState("");
+  const { register, loading } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -23,21 +23,29 @@ const CitizenRegister = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
+      setError("Passwords do not match");
       return;
     }
 
-    setLoading(true);
-    const result = await register({
+    // Trim values
+    const payload = {
       ...formData,
+      name: formData.name?.trim(),
+      email: formData.email?.trim(),
+      phone: formData.phone?.trim(),
+      address: formData.address?.trim(),
       role: "citizen",
-    });
-    setLoading(false);
+    };
+
+    const result = await register(payload);
 
     if (result.success) {
       navigate("/citizen/dashboard");
+    } else {
+      setError(result.message);
     }
   };
 
@@ -53,11 +61,12 @@ const CitizenRegister = () => {
           <p>Create your account to access services</p>
         </div>
 
+        {error && <p className="auth-error">{error}</p>}
+
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">
-              <User size={16} />
-              Full Name
+              <User size={16} /> Full Name
             </label>
             <input
               type="text"
@@ -72,8 +81,7 @@ const CitizenRegister = () => {
 
           <div className="form-group">
             <label className="form-label">
-              <Mail size={16} />
-              Email Address
+              <Mail size={16} /> Email Address
             </label>
             <input
               type="email"
@@ -88,8 +96,7 @@ const CitizenRegister = () => {
 
           <div className="form-group">
             <label className="form-label">
-              <Phone size={16} />
-              Phone Number
+              <Phone size={16} /> Phone Number
             </label>
             <input
               type="tel"
@@ -104,8 +111,7 @@ const CitizenRegister = () => {
 
           <div className="form-group">
             <label className="form-label">
-              <MapPin size={16} />
-              Address
+              <MapPin size={16} /> Address
             </label>
             <input
               type="text"
@@ -120,8 +126,7 @@ const CitizenRegister = () => {
 
           <div className="form-group">
             <label className="form-label">
-              <Lock size={16} />
-              Password
+              <Lock size={16} /> Password
             </label>
             <input
               type="password"
@@ -133,10 +138,10 @@ const CitizenRegister = () => {
               required
             />
           </div>
+
           <div className="form-group">
             <label className="form-label">
-              <Lock size={16} />
-              Confirm Password
+              <Lock size={16} /> Confirm Password
             </label>
             <input
               type="password"
